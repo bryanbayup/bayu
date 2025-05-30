@@ -101,13 +101,12 @@ Alasan filtering adalah untuk mengurangi noise dari pengguna pasif dan film yang
 | Diversity         | Rendah        | Sedang                  |
 | Skalabilitas      | Tinggi        | Rendah (resource-heavy) |
 
-**Referensi**:
+# Referensi:
 
-* \[1] MovieLens Dataset. GroupLens Research. [https://grouplens.org/datasets/movielens/1m/](https://grouplens.org/datasets/movielens/1m/)
-* \[2] Movie Recommendation System (Content-Based Filtering) - IJIRSET. [https://www.ijirset.com/upload/2024/june/13\_Movie.pdf](https://www.ijirset.com/upload/2024/june/13_Movie.pdf)
-* \[3] What is collaborative filtering? - IBM. [https://www.ibm.com/think/topics/collaborative-filtering](https://www.ibm.com/think/topics/collaborative-filtering)
-* \[4] A Survey on Deep Neural Networks in Collaborative Filtering Recommendation Systems - arXiv: [https://arxiv.org/abs/2412.01378](https://arxiv.org/abs/2412.01378)
-* \[5] Content-Based and Collaborative Filtering Models - GitHub. [https://github.com/khanhnamle1994/movielens/blob/master/Content\_Based\_and\_Collaborative\_Filtering\_Models.ipynb](https://github.com/khanhnamle1994/movielens/blob/master/Content_Based_and_Collaborative_Filtering_Models.ipynb)
-* \[6] What is content-based filtering? - IBM. [https://www.ibm.com/think/topics/content-based-filtering](https://www.ibm.com/think/topics/content-based-filtering)
-* \[7] Content-based Filtering for Improving Movie Recommender System - Atlantis Press. [https://www.atlantis-press.com/article/125998090.pdf](https://www.atlantis-press.com/article/125998090.pdf)
-* \[8] Enhancing Recommender Systems - MDPI. [https://www.mdpi.com/2076-3417/13/18/10041](https://www.mdpi.com/2076-3417/13/18/10041)
+* \[1] [Movie Recommendation System (Content-Based Filtering) - IJIRSET.](https://www.ijirset.com/upload/2024/june/13_Movie.pdf)
+* \[2] [What is collaborative filtering? - IBM.](https://www.ibm.com/think/topics/collaborative-filtering)
+* \[3] [A Survey on Deep Neural Networks in Collaborative Filtering Recommendation Systems - arXiv](https://arxiv.org/abs/2412.01378)
+* \[4] [Content-Based and Collaborative Filtering Models - GitHub.](https://github.com/khanhnamle1994/movielens/blob/master/Content_Based_and_Collaborative_Filtering_Models.ipynb)
+* \[5] [What is content-based filtering? - IBM.](https://www.ibm.com/think/topics/content-based-filtering)
+* \[6] [Content-based Filtering for Improving Movie Recommender System - Atlantis Press.](https://www.atlantis-press.com/article/125998090.pdf)
+* \[7] [Enhancing Recommender Systems - MDPI.](https://www.mdpi.com/2076-3417/13/18/10041)
