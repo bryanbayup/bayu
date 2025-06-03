@@ -150,7 +150,7 @@ Model menggunakan TF-IDF untuk mengkonversi fitur teks menjadi vektor numerik, k
 - Tidak memerlukan data user lain
 - Interpretable dan transparan
 
-**Contoh Output Top-5 Rekomendasi untuk 'Toy Story (1995)'**:
+**Output Top-5 Rekomendasi untuk 'Toy Story (1995)'**:
 ```
                                 Title                           Genres  Year  Similarity_Score
 Toy Story 2 (1999)                   Animation|Children's|Comedy  1999              0.764532
@@ -185,7 +185,7 @@ class ImprovedNCFModel(keras.Model):
 - Personalisasi tinggi berdasarkan collaborative signals
 - Menggunakan embedding untuk representasi laten
 
-**Contoh Output Top-10 Rekomendasi untuk User ID 1**:
+**Output Top-10 Rekomendasi untuk User ID 1**:
 ```
                                     Title                           Genres  PredictedRating  NumRatings
 Shawshank Redemption, The (1994)        Crime|Drama              0.941567        2227
