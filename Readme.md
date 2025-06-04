@@ -31,7 +31,7 @@ Dataset yang digunakan adalah **MovieLens 1M** dari GroupLens:
 
 * Jumlah rating: 1.000.209
 * Jumlah pengguna: 6.040
-* Jumlah film: 3.883
+* Jumlah film: 3.883 (3.706 film unik)
 * Sumber: [GroupLens](https://grouplens.org/datasets/movielens/1m/)
 
 ### Fitur utama:
@@ -42,10 +42,12 @@ Dataset yang digunakan adalah **MovieLens 1M** dari GroupLens:
 
 ### Insight Awal:
 
-* Skala rating: 1 - 5
+* Skala rating: 1 - 5 (rata-rata: 3.58, median: 4.0)
 * Matrix sangat sparse (95.53%)
-* Rating didominasi nilai tinggi (bias positif)
-* Genre populer: Drama, Comedy
+* Rating didominasi nilai tinggi (bias positif) - rating 4 dan 5 paling banyak
+* Genre populer: Drama (1603 film), Comedy (1200 film), Action (503 film)
+* Distribusi user dan movie bersifat long-tail
+* Tidak ada missing values di seluruh dataset
 
 ## Data Preparation
 
@@ -95,7 +97,7 @@ filtered_ratings = ratings[
     (ratings['MovieID'].isin(popular_movies))
 ].copy()
 ```
-Hanya pengguna dan film dengan minimal 20 rating yang disertakan untuk mengurangi noise dan sparsity data.
+Hanya pengguna dan film dengan minimal 20 rating yang disertakan untuk mengurangi noise dan sparsity data. Hasilnya adalah pengurangan data hanya 0.5% (dari 1.000.209 menjadi 995.492 ratings).
 
 ### 6. Pembuatan Mapping untuk Collaborative Filtering
 ```python
@@ -120,7 +122,7 @@ Mapping ID asli ke indeks numerik dibuat untuk kompatibilitas dengan model neura
 train_data, temp_data = train_test_split(filtered_ratings, test_size=0.3, random_state=SEED)
 val_data, test_data = train_test_split(temp_data, test_size=0.5, random_state=SEED)
 ```
-Dataset dibagi dengan proporsi 70%:15%:15% untuk training, validation, dan testing.
+Dataset dibagi dengan proporsi 70%:15%:15% untuk training (696,844 sampel), validation (149,324 sampel), dan testing (149,324 sampel).
 
 **Alasan filtering**: Mengurangi noise dari pengguna pasif dan film yang tidak cukup populer, sehingga model dapat fokus pada pola yang lebih signifikan.
 
@@ -153,11 +155,11 @@ Model menggunakan TF-IDF untuk mengkonversi fitur teks menjadi vektor numerik, k
 **Output Top-5 Rekomendasi untuk 'Toy Story (1995)'**:
 ```
                                 Title                           Genres  Year  Similarity_Score
-Toy Story 2 (1999)                   Animation|Children's|Comedy  1999              0.764532
-Bug's Life, A (1998)                 Animation|Children's|Comedy  1998              0.487853
-Antz (1998)                          Animation|Children's|Comedy  1998              0.432156
-Monsters, Inc. (2001)                Animation|Children's|Comedy  2001              0.398745
-Shrek (2001)                         Animation|Children's|Comedy  2001              0.365298
+Toy Story 2 (1999)                   [Animation, Children's, Comedy]  1999              1.000000
+Rugrats Movie, The (1998)            [Animation, Children's, Comedy]  1998              0.429074
+Balto (1995)                         [Animation, Children's]          1995              0.426529
+Aristocats, The (1970)               [Animation, Children's]          1970              0.426529
+Fox and the Hound, The (1981)        [Animation, Children's]          1981              0.426529
 ```
 
 ### 2. Collaborative Filtering (Neural CF)
@@ -185,19 +187,25 @@ class ImprovedNCFModel(keras.Model):
 - Personalisasi tinggi berdasarkan collaborative signals
 - Menggunakan embedding untuk representasi laten
 
+**Training Process**:
+- Model dilatih selama 50 epochs dengan early stopping
+- Menggunakan callbacks: EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+- Learning rate dimulai dari 0.001 dan dikurangi secara otomatis
+- Tidak terjadi overfitting yang signifikan
+
 **Output Top-10 Rekomendasi untuk User ID 1**:
 ```
                                     Title                           Genres  PredictedRating  NumRatings
-Shawshank Redemption, The (1994)        Crime|Drama              0.941567        2227
-Godfather, The (1972)                   Action|Crime|Drama       0.937845        1541
-Schindler's List (1993)                 Drama|War                0.935621        1689
-Casablanca (1942)                       Drama|Romance|War        0.932198        1201
-One Flew Over the Cuckoo's Nest (1975) Drama                    0.928734        1311
-Rear Window (1954)                      Mystery|Thriller         0.925467        1050
-Dr. Strangelove (1963)                  Comedy|War               0.922356        1098
-Citizen Kane (1941)                     Drama                    0.919821        1002
-Vertigo (1958)                          Mystery|Thriller         0.917439        1005
-North by Northwest (1959)               Action|Thriller          0.914856        1008
+Shawshank Redemption, The (1994)        [Drama]                  0.953521        2227
+Sanjuro (1962)                          [Action, Adventure]      0.944068          69
+Raiders of the Lost Ark (1981)         [Action, Adventure]      0.922286        2514
+Braveheart (1995)                       [Action, Drama, War]     0.913436        2443
+Green Mile, The (1999)                  [Drama, Thriller]        0.912013        1222
+Usual Suspects, The (1995)              [Crime, Thriller]        0.902767        1783
+Matrix, The (1999)                      [Action, Sci-Fi, Thriller] 0.896696      2590
+Forrest Gump (1994)                     [Comedy, Romance, War]   0.895118        2194
+October Sky (1999)                      [Drama]                  0.890156         588
+Life Is Beautiful (1997)                [Comedy, Drama]          0.890053        1152
 ```
 
 ## Evaluation
@@ -214,7 +222,13 @@ North by Northwest (1959)               Action|Thriller          0.914856       
 **Hasil Evaluasi**:
 - **Test RMSE**: 0.2204 (Denormalized: 0.8818)
 - **Test MAE**: 0.1735 (Denormalized: 0.6940)
-- **Test Loss (MSE)**: 0.0486
+- **Test Loss (MSE)**: 0.0497
+
+**Analisis Training**:
+- Konvergensi yang stabil tanpa overfitting
+- Validation metrics stabil setelah epoch ke-20
+- Jarak antara training dan validation metrics relatif kecil, menunjukkan generalisasi yang baik
+- Model berhasil menghindari fluktuasi berlebihan dengan bantuan regularisasi
 
 ### Perbandingan Model
 
@@ -226,30 +240,45 @@ North by Northwest (1959)               Action|Thriller          0.914856       
 | Cold Start - Item | Bisa          | Tidak bisa              |
 | Diversity         | Rendah        | Sedang                  |
 | Skalabilitas      | Tinggi        | Rendah (resource-heavy) |
+| Interpretability  | Tinggi        | Rendah                  |
 
 ### Hubungan dengan Business Understanding
 
 #### Menjawab Problem Statements:
 
 1. **Problem Statement 1**: "Bagaimana mengidentifikasi film yang disukai pengguna berdasarkan konten film?"
-   - **Jawaban**: Content-Based Filtering berhasil mengidentifikasi film serupa berdasarkan genre dan judul. Meskipun precision rendah (3.54%), model dapat memberikan rekomendasi yang relevan secara konten, seperti merekomendasikan film animasi untuk Toy Story.
+   - **Jawaban**: Content-Based Filtering berhasil mengidentifikasi film serupa berdasarkan genre dan judul. Meskipun precision rendah (3.54%), model dapat memberikan rekomendasi yang relevan secara konten, seperti merekomendasikan film animasi anak-anak untuk Toy Story (Toy Story 2, Rugrats Movie, Balto, dll).
 
 2. **Problem Statement 2**: "Bagaimana memanfaatkan pola rating dari banyak pengguna?"
-   - **Jawaban**: Neural Collaborative Filtering berhasil memanfaatkan pola rating dengan excellent performance (RMSE: 0.88). Model dapat memprediksi rating dengan akurasi tinggi dan memberikan rekomendasi personal yang berkualitas.
+   - **Jawaban**: Neural Collaborative Filtering berhasil memanfaatkan pola rating dengan excellent performance (RMSE: 0.88). Model dapat memprediksi rating dengan akurasi tinggi dan memberikan rekomendasi personal yang berkualitas dengan predicted rating > 0.89.
 
 3. **Problem Statement 3**: "Bagaimana menangani masalah cold start?"
-   - **Jawaban**: Masalah cold start dapat diatasi dengan pendekatan hybrid - Content-Based untuk item baru, Collaborative untuk user dengan history rating yang cukup.
+   - **Jawaban**: Masalah cold start dapat diatasi dengan pendekatan hybrid - Content-Based untuk item baru (dapat merekomendasikan film baru berdasarkan konten), Collaborative untuk user dengan history rating yang cukup.
 
 #### Pencapaian Goals:
 
-1. **Goal 1** ✅: Model Content-Based berbasis TF-IDF berhasil dikembangkan dengan cosine similarity sebagai metrik kemiripan.
-2. **Goal 2** ✅: Model NCF berhasil dibangun dengan arsitektur embedding + deep neural network yang optimal.
-3. **Goal 3** ✅: Perbandingan menunjukkan Collaborative Filtering unggul dalam akurasi prediksi, sedangkan Content-Based unggul dalam interpretability dan cold start handling.
+1. **Goal 1** ✅: Model Content-Based berbasis TF-IDF berhasil dikembangkan dengan cosine similarity sebagai metrik kemiripan, mampu memberikan rekomendasi yang relevan secara konten.
+2. **Goal 2** ✅: Model NCF berhasil dibangun dengan arsitektur embedding + deep neural network yang optimal, menunjukkan performa training yang stabil dan akurasi prediksi tinggi.
+3. **Goal 3** ✅: Perbandingan menunjukkan Collaborative Filtering unggul dalam akurasi prediksi (RMSE: 0.88 vs precision content-based: 0.035), sedangkan Content-Based unggul dalam interpretability dan cold start handling.
 
 #### Dampak Solution Statements:
 
-1. **Content-Based Solution**: Memberikan fondasi untuk menangani film baru dan memberikan eksplanasi rekomendasi yang jelas kepada pengguna.
-2. **Collaborative Filtering Solution**: Menghasilkan rekomendasi yang highly personalized dengan akurasi prediksi rating yang tinggi, meningkatkan user engagement potensial.
+1. **Content-Based Solution**: Memberikan fondasi untuk menangani film baru dan memberikan eksplanasi rekomendasi yang jelas kepada pengguna. Cocok sebagai baseline dan fallback mechanism.
+2. **Collaborative Filtering Solution**: Menghasilkan rekomendasi yang highly personalized dengan akurasi prediksi rating yang tinggi, meningkatkan user engagement potensial melalui prediksi yang akurat.
+
+## Kesimpulan
+
+1. **Dataset Characteristics**: Sparsity tinggi (~95.5%) berhasil diatasi dengan filtering aktif user & popular movies tanpa kehilangan data signifikan (hanya 0.5% reduction).
+
+2. **Model Performance**: 
+   - Collaborative Filtering menunjukkan performa superior dengan RMSE 0.88 pada skala 1-5
+   - Content-Based Filtering memiliki precision rendah (3.54%) tapi memberikan rekomendasi yang interpretable
+
+3. **Training Success**: Model NCF menunjukkan konvergensi stabil, tidak overfitting, dengan bantuan regularization techniques dan callbacks yang efektif.
+
+4. **Business Impact**: Sistem dapat memberikan rekomendasi yang akurat untuk user aktif (melalui collaborative filtering) dan menangani cold start items (melalui content-based filtering).
+
+5. **Future Improvements**: Kombinasi model hybrid (content + collaborative) dapat memberikan solusi yang lebih robust untuk mengatasi berbagai scenario rekomendasi.
 
 # Referensi:
 
